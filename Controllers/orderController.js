@@ -1,4 +1,4 @@
-const OrderModel = require('../Models/OrderModel');
+const OrderModel = require('../Models/OrderSchema');
 const UserModel = require('../Models/UserSchema');
 
 const getAllOrdersByUser = async (req, res) => {
