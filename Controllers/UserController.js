@@ -113,7 +113,7 @@ const deleteUser = async (req, res) => {
 };
 
 const getUserFromToken = async (req, res) => {
-  const token = req.headers.authorization ;
+  const token = req.headers.authorization;
   if (!token) {
     return res.status(401).json({ message: "Token Not Found" });
   }
@@ -129,6 +129,32 @@ const getUserFromToken = async (req, res) => {
   }
 };
 
+const adminLogin = async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+  try {
+    const user = await UserModel.find({ email, role: 'admin' });
+    if (!user || user.length === 0) {
+      return res.status(400).json({ message: "Admin does not exist" });
+    }
+    const match = await bcrypt.compare(password, user[0].password);
+    if (!match) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    const token = jwt.sign({ id: user[0]._id }, process.env.JWT_KEY, {
+      expiresIn: "23h",
+    });
+    if (!token) {
+      return res.status(400).json({ message: "Token not generated" });
+    }
+    res.status(200).json({ token, message: "Logged in successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -136,4 +162,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getUserFromToken,
+  adminLogin
 };

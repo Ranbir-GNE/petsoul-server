@@ -9,8 +9,11 @@ const healthRecordRoutes = require("./Routes/HealthRecordsRoutes");
 const reportRoutes = require("./Routes/ReportRoutes");
 const petRoutes = require("./Routes/PetsRoutes");
 const vaccinationRoutes = require("./Routes/VaccinationRoutes");
+const orderRoutes = require("./Routes/OrderRoutes");
+const adminOrderRoutes = require("./Routes/AdminOrdersRoutes");
+const productRoutes = require("./Routes/ProductRoutes");
 
-const authMiddleware = require("./middleware/authMiddleware");
+const { authMiddleware, isAdmin } = require("./middleware/authMiddleware");
 const loggerMiddleware = require("./middleware/loggerMiddleware");
 
 const app = express();
@@ -42,3 +45,21 @@ app.use(
   authMiddleware,
   vaccinationRoutes
 );
+app.use("/api/orders", loggerMiddleware, authMiddleware, orderRoutes);
+app.use(
+  "/api/admin/orders",
+  loggerMiddleware,
+  authMiddleware,
+  isAdmin,
+  adminOrderRoutes
+);
+app.use("/api/products", loggerMiddleware, authMiddleware, productRoutes);
+app.use(
+  "/api/admin/products",
+  loggerMiddleware,
+  authMiddleware,
+  isAdmin,
+  productRoutes
+);
+
+

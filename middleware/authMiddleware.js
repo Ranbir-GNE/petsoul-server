@@ -26,4 +26,28 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = authMiddleware;
+const isAdmin = async (req, res, next) => {
+  const headers = req.headers;
+  if (!headers) {
+    return res.status(401).json({ message: "No headers found" });
+  }
+  const token = headers.authorization;
+  if (!token) {
+    return res.status(404).json({ message: "No token found" });
+  }
+  try {
+    const decode = jwt.verify(token, process.env.JWT_KEY);
+    req.id = decode.id;
+    const user = await UserModel.findById(req.id);
+
+    if (user && user.role === 'admin') {
+      next();
+    } else {
+      return res.status(403).json({ message: "Forbidden: Admins only" });
+    }
+  } catch (err) {
+    return res.status(401).json({ message: err.message });
+  }
+}
+
+module.exports = { authMiddleware, isAdmin };
